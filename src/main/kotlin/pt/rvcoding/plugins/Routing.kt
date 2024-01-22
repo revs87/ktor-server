@@ -1,7 +1,7 @@
 package pt.rvcoding.plugins
 
 import io.ktor.server.application.*
-import io.ktor.server.response.*
+import io.ktor.server.http.content.*
 import io.ktor.server.routing.*
 import pt.rvcoding.routes.authentication
 import pt.rvcoding.routes.configuration
@@ -18,7 +18,7 @@ fun Application.configureRouting(companyId: String) {
 }
 
 private fun Routing.root() {
-    get("/") {
-        call.respondText { "Hello World!" }
+    staticResources("/", "static") {
+        default("rvcbanner.jpg")
     }
 }
