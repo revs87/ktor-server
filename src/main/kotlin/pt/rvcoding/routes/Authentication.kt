@@ -22,10 +22,9 @@ fun Routing.authentication(companyId: String) {
                 message = AuthResponse(result.code, result::class.simpleName.toString(), "User registration failed."),
                 status = HttpStatusCode.BadRequest
             )
-            is UserAlreadyRegisteredError -> call.respond(
-                message = AuthResponse(result.code, result::class.simpleName.toString(), "User registration failed."),
-                status = HttpStatusCode.PreconditionFailed
-            )
+            is UserAlreadyRegisteredError -> {
+                call.respondRedirect(url = "/$companyId/login?username=$username&password=$password", permanent = false)
+            }
             is Success -> call.respond(
                 message = AuthResponse(result.code, result::class.simpleName.toString(), "User registered successfully."),
                 status = HttpStatusCode.OK
