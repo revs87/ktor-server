@@ -6,6 +6,7 @@ val koinVersion: String by project
 plugins {
     application
     kotlin("jvm") version "1.9.21"
+    kotlin("plugin.serialization") version "1.9.21"
 }
 
 group = "pt.rvcoding"

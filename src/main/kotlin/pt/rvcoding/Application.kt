@@ -1,7 +1,7 @@
 package pt.rvcoding
 
 import io.ktor.server.application.*
-import pt.rvcoding.plugins.configureRouting
+import pt.rvcoding.plugins.*
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 //fun main(args: Array<String>): Unit {
@@ -12,5 +12,10 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
 @Suppress("Unused")
 fun Application.module() {
-    configureRouting()
+    configureSerialization()
+    configureKoin()
+    configureRouting("rvc")
+    configureMonitoring()
+    configureDefaultHeader()
+    configureStatusPages()
 }
