@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AuthResponse(
-    val code: String,
+    val code: Int,
     val type: String,
     val message: String
 )
