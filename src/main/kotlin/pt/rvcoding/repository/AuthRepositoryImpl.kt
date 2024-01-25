@@ -1,9 +1,9 @@
 package pt.rvcoding.repository
 
-import pt.rvcoding.domain.AuthRepository
-import pt.rvcoding.domain.ChangePasswordResult
-import pt.rvcoding.domain.LoginResult
-import pt.rvcoding.domain.RegisterResult
+import pt.rvcoding.domain.auth.AuthRepository
+import pt.rvcoding.domain.auth.ChangePasswordResult
+import pt.rvcoding.domain.auth.LoginResult
+import pt.rvcoding.domain.auth.RegisterResult
 import java.util.Collections.synchronizedList
 
 class AuthRepositoryImpl : AuthRepository {

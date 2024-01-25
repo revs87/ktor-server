@@ -1,4 +1,4 @@
-package pt.rvcoding.domain
+package pt.rvcoding.domain.auth
 
 interface AuthRepository {
     fun register(username: String?, password: String?): RegisterResult
@@ -17,6 +17,7 @@ sealed class LoginResult(val code: Int) {
     data object Success : LoginResult(200)
     data object InvalidParametersError : LoginResult(201)
     data object CredentialsMismatchError : LoginResult(202)
+    data object UnauthorizedError : LoginResult(203)
 }
 
 sealed class ChangePasswordResult(val code: Int) {
