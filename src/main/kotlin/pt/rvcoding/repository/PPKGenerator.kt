@@ -1,6 +1,7 @@
 package pt.rvcoding.repository
 
 import io.ktor.utils.io.core.*
+import pt.rvcoding.domain.Configuration.Companion.PKK_ENCRYPTION_IS_ACTIVE
 import java.security.*
 import java.security.spec.PKCS8EncodedKeySpec
 import java.security.spec.X509EncodedKeySpec
@@ -60,6 +61,8 @@ class PPKGenerator {
     }
 
     fun encrypt(input: String): String {
+        if (!PKK_ENCRYPTION_IS_ACTIVE) return input
+
         // Generate a random symmetric key
         val symmetricKey = generateSymmetricKey()
 
@@ -81,6 +84,8 @@ class PPKGenerator {
     }
 
     fun decrypt(input: String): String {
+        if (!PKK_ENCRYPTION_IS_ACTIVE) return input
+
         // Decode the input from Base64
         val combinedBytes = Base64.getDecoder().decode(input)
 

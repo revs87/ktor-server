@@ -11,6 +11,7 @@ sealed class RegisterResult(val code: Int) {
     data object InvalidParametersError : RegisterResult(101)
     data object CriteriaNotMetError : RegisterResult(102)
     data object UserAlreadyRegisteredError : RegisterResult(103)
+    data object UnauthorizedError : RegisterResult(104)
 }
 
 sealed class LoginResult(val code: Int) {

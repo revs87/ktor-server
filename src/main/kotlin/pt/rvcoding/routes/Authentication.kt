@@ -24,27 +24,32 @@ fun Routing.authentication(companyId: String) {
 
     post("/$companyId/register") {
         val request = call.receive<AuthRequest>()
-        val (username, password) = listOf(ppkGenerator.decrypt(request.username), ppkGenerator.decrypt(request.password))
-        when (val result = authRepository.register(username, password)) {
-            is InvalidParametersError, is CriteriaNotMetError -> call.respond(
-                message = AuthResponse(result.code, result::class.simpleName.toString(), "User registration failed."),
-                status = HttpStatusCode.BadRequest
-            )
-            is UserAlreadyRegisteredError -> {
-                isInternal = true
-                call.respondRedirect(url = "/$companyId/loginInternal?username=$username&password=$password", permanent = false)
+        try {
+            val (username, password) = listOf(ppkGenerator.decrypt(request.username), ppkGenerator.decrypt(request.password))
+            when (val result = authRepository.register(username, password)) {
+                is InvalidParametersError, is CriteriaNotMetError -> call.respond(
+                    message = AuthResponse(result.code, result::class.simpleName.toString(), "User registration failed."),
+                    status = HttpStatusCode.BadRequest
+                )
+                is UnauthorizedError -> onUnauthorizedError()
+                is UserAlreadyRegisteredError -> {
+                    isInternal = true
+                    call.respondRedirect(url = "/$companyId/loginInternal?username=$username&password=$password", permanent = false)
+                }
+                is Success -> call.respond(
+                    message = AuthResponse(result.code, result::class.simpleName.toString(), "User registered successfully."),
+                    status = HttpStatusCode.OK
+                )
             }
-            is Success -> call.respond(
-                message = AuthResponse(result.code, result::class.simpleName.toString(), "User registered successfully."),
-                status = HttpStatusCode.OK
-            )
-        }
+        } catch (e: Exception) { onUnauthorizedError() }
     }
 
     post("/$companyId/login") {
         val request = call.receive<AuthRequest>()
-        val (username, password) = listOf(ppkGenerator.decrypt(request.username), ppkGenerator.decrypt(request.password))
-        loginHandle(authRepository, username, password)
+        try {
+            val (username, password) = listOf(ppkGenerator.decrypt(request.username), ppkGenerator.decrypt(request.password))
+            loginHandle(authRepository, username, password)
+        } catch (e: Exception) { onUnauthorizedError() }
     }
     get("/$companyId/loginInternal") {
         if (!isInternal) {
@@ -57,8 +62,9 @@ fun Routing.authentication(companyId: String) {
         loginHandle(authRepository, username, password)
     }
 
-    post("/$companyId/changepassword") {
-    }
+//    post("/$companyId/changepassword") {
+//    }
+
 }
 
 private suspend fun PipelineContext<Unit, ApplicationCall>.loginHandle(
@@ -71,14 +77,11 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.loginHandle(
             message = AuthResponse(result.code, result::class.simpleName.toString(), "User login failed."),
             status = HttpStatusCode.PreconditionFailed
         )
-
         LoginResult.UnauthorizedError -> onUnauthorizedError()
-
         LoginResult.InvalidParametersError -> call.respond(
             message = AuthResponse(result.code, result::class.simpleName.toString(), "User login failed."),
             status = HttpStatusCode.BadRequest
         )
-
         LoginResult.Success -> call.respond(
             message = AuthResponse(result.code, result::class.simpleName.toString(), "User logged in successfully."),
             status = HttpStatusCode.OK
@@ -91,9 +94,9 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.onUnauthorizedError()
         message = AuthResponse(
             LoginResult.UnauthorizedError.code,
             LoginResult.UnauthorizedError::class.simpleName.toString(),
-            "User login failed."
+            "User unauthorized."
         ),
-        status = HttpStatusCode.PreconditionFailed
+        status = HttpStatusCode.Unauthorized
     )
 }
 

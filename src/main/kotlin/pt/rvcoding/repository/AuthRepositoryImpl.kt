@@ -10,22 +10,26 @@ class AuthRepositoryImpl : AuthRepository {
     private val users: MutableList<String> = synchronizedList(mutableListOf())
 
     override fun register(username: String?, password: String?): RegisterResult {
-        return when {
-            !validCredentials(username, password) -> RegisterResult.InvalidParametersError
-            users.contains(username) -> RegisterResult.UserAlreadyRegisteredError
-            else -> {
-                username?.let { users.add(it) }
-                RegisterResult.Success
+        return try {
+            when {
+                !validCredentials(username, password) -> RegisterResult.InvalidParametersError
+                users.contains(username) -> RegisterResult.UserAlreadyRegisteredError
+                else -> {
+                    username?.let { users.add(it) }
+                    RegisterResult.Success
+                }
             }
-        }
+        } catch (e: Exception) { RegisterResult.UnauthorizedError }
     }
 
     override fun login(username: String?, password: String?): LoginResult {
-        return when {
-            !validCredentials(username, password) -> LoginResult.InvalidParametersError
-            !users.contains(username) -> LoginResult.CredentialsMismatchError
-            else -> LoginResult.Success
-        }
+        return try {
+            when {
+                !validCredentials(username, password) -> LoginResult.InvalidParametersError
+                !users.contains(username) -> LoginResult.CredentialsMismatchError
+                else -> LoginResult.Success
+            }
+        } catch (e: Exception) { LoginResult.UnauthorizedError }
     }
 
     override fun changePassword(username: String?, password: String?, newPassword: String?): ChangePasswordResult {
