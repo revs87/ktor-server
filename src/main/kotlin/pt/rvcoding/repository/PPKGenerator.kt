@@ -23,8 +23,8 @@ class PPKGenerator {
 
     fun generateNewKeyPair() {
         // Generate key pair
-        val keyPairGenerator = KeyPairGenerator.getInstance("RSA")
-        keyPairGenerator.initialize(2048)
+        val keyPairGenerator = KeyPairGenerator.getInstance(ASYMMETRIC_ALGORITHM)
+        keyPairGenerator.initialize(ASYMMETRIC_KEY_SIZE)
         val keyPair: KeyPair = keyPairGenerator.generateKeyPair()
 
         // Extract public and private keys from the key pair
@@ -49,13 +49,13 @@ class PPKGenerator {
     fun publicKeyAsString(): String = publicKey.encoded.decodeToString()
 
     private fun convertStringToPrivateKey(keyString: String): PrivateKey {
-        val keyFactory = KeyFactory.getInstance("RSA")
+        val keyFactory = KeyFactory.getInstance(ASYMMETRIC_ALGORITHM)
         val keySpec = PKCS8EncodedKeySpec(Base64.getDecoder().decode(keyString))
         return keyFactory.generatePrivate(keySpec)
     }
 
     private fun convertStringToPublicKey(keyString: String): PublicKey {
-        val keyFactory = KeyFactory.getInstance("RSA")
+        val keyFactory = KeyFactory.getInstance(ASYMMETRIC_ALGORITHM)
         val keySpec = X509EncodedKeySpec(Base64.getDecoder().decode(keyString))
         return keyFactory.generatePublic(keySpec)
     }
@@ -67,12 +67,12 @@ class PPKGenerator {
         val symmetricKey = generateSymmetricKey()
 
         // Encrypt the plaintext with the symmetric key using a symmetric encryption algorithm (AES in this case)
-        val cipher = Cipher.getInstance("AES")
+        val cipher = Cipher.getInstance(SYMMETRIC_ALGORITHM)
         cipher.init(Cipher.ENCRYPT_MODE, symmetricKey)
         val encryptedBytes = cipher.doFinal(input.toByteArray())
 
         // Encrypt the symmetric key with the RSA public key
-        val rsaCipher = Cipher.getInstance("RSA")
+        val rsaCipher = Cipher.getInstance(ASYMMETRIC_ALGORITHM)
         rsaCipher.init(Cipher.ENCRYPT_MODE, publicKey)
         val encryptedSymmetricKey = rsaCipher.doFinal(symmetricKey.encoded)
 
@@ -90,19 +90,19 @@ class PPKGenerator {
         val combinedBytes = Base64.getDecoder().decode(input)
 
         // Extract the encrypted symmetric key and data
-        val encryptedSymmetricKey = combinedBytes.copyOfRange(0, 256) // Assuming a 2048-bit key, which is 256 bytes
-        val encryptedData = combinedBytes.copyOfRange(256, combinedBytes.size)
+        val encryptedSymmetricKey = combinedBytes.copyOfRange(0, SYMMETRIC_KEY_SIZE) // Assuming a 2048-bit key, which is 256 bytes
+        val encryptedData = combinedBytes.copyOfRange(SYMMETRIC_KEY_SIZE, combinedBytes.size)
 
         // Decrypt the symmetric key with the RSA private key
-        val rsaCipher = Cipher.getInstance("RSA")
+        val rsaCipher = Cipher.getInstance(ASYMMETRIC_ALGORITHM)
         rsaCipher.init(Cipher.DECRYPT_MODE, privateKey)
         val decryptedSymmetricKey = rsaCipher.doFinal(encryptedSymmetricKey)
 
         // Reconstruct the SecretKey from the decrypted key material
-        val reconstructedSymmetricKey = SecretKeySpec(decryptedSymmetricKey, "AES")
+        val reconstructedSymmetricKey = SecretKeySpec(decryptedSymmetricKey, SYMMETRIC_ALGORITHM)
 
         // Decrypt the data with the reconstructed symmetric key using a symmetric encryption algorithm (AES in this case)
-        val cipher = Cipher.getInstance("AES")
+        val cipher = Cipher.getInstance(SYMMETRIC_ALGORITHM)
         cipher.init(Cipher.DECRYPT_MODE, reconstructedSymmetricKey)
         val decryptedBytes = cipher.doFinal(encryptedData)
 
@@ -111,9 +111,16 @@ class PPKGenerator {
     }
 
     private fun generateSymmetricKey(): SecretKey {
-        val keyGenerator = KeyGenerator.getInstance("AES")
-        keyGenerator.init(256) // Use a key size suitable for your needs
+        val keyGenerator = KeyGenerator.getInstance(SYMMETRIC_ALGORITHM)
+        keyGenerator.init(SYMMETRIC_KEY_SIZE) // Use a key size suitable for your needs
         return keyGenerator.generateKey()
+    }
+
+    companion object {
+        const val ASYMMETRIC_ALGORITHM = "RSA"
+        const val ASYMMETRIC_KEY_SIZE = 2048
+        const val SYMMETRIC_ALGORITHM = "AES"
+        const val SYMMETRIC_KEY_SIZE = 256
     }
 }
 

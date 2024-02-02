@@ -89,7 +89,7 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.loginHandle(
     }
 }
 
-private suspend fun PipelineContext<Unit, ApplicationCall>.onUnauthorizedError() {
+suspend fun PipelineContext<Unit, ApplicationCall>.onUnauthorizedError() {
     call.respond(
         message = AuthResponse(
             LoginResult.UnauthorizedError.code,
