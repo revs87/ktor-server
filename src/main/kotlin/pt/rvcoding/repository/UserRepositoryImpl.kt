@@ -1,10 +1,12 @@
 package pt.rvcoding.repository
 
+import org.koin.java.KoinJavaComponent
 import pt.rvcoding.domain.models.User
 import pt.rvcoding.domain.repository.UserRepository
 import java.util.*
 
 class UserRepositoryImpl: UserRepository {
+    private val ppkGenerator: PPKGenerator by KoinJavaComponent.inject(PPKGenerator::class.java)
 
     private val users: MutableMap<String, User> = Collections.synchronizedMap(mutableMapOf())
 
@@ -13,7 +15,7 @@ class UserRepositoryImpl: UserRepository {
         val user = users[email]
         return when {
             user == null -> false
-            user.password == password -> true
+            ppkGenerator.decrypt(user.password) == password -> true
             else -> false
         }
     }
