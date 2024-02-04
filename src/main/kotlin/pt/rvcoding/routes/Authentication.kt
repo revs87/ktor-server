@@ -8,21 +8,22 @@ import io.ktor.server.routing.*
 import io.ktor.util.pipeline.*
 import kotlinx.serialization.Serializable
 import org.koin.ktor.ext.inject
-import pt.rvcoding.domain.auth.AuthRepository
-import pt.rvcoding.domain.auth.AuthResponse
-import pt.rvcoding.domain.auth.LoginResult
-import pt.rvcoding.domain.auth.RegisterResult.*
+import pt.rvcoding.domain.Route
+import pt.rvcoding.domain.repository.AuthRepository
+import pt.rvcoding.domain.repository.LoginResult
+import pt.rvcoding.domain.repository.RegisterResult.*
+import pt.rvcoding.domain.response.AuthResponse
 import pt.rvcoding.repository.PPKGenerator
 
 
-fun Routing.authentication(companyId: String) {
+fun Routing.authentication() {
     val authRepository: AuthRepository by inject()
     val ppkGenerator: PPKGenerator by inject()
 
     var isInternal = false
 
 
-    post("/$companyId/register") {
+    post(Route.Register.path) {
         val request = call.receive<AuthRequest>()
         try {
             val (username, password) = listOf(ppkGenerator.decrypt(request.username), ppkGenerator.decrypt(request.password))
@@ -34,7 +35,7 @@ fun Routing.authentication(companyId: String) {
                 is UnauthorizedError -> onUnauthorizedError()
                 is UserAlreadyRegisteredError -> {
                     isInternal = true
-                    call.respondRedirect(url = "/$companyId/loginInternal?username=$username&password=$password", permanent = false)
+                    call.respondRedirect(url = "${Route.LoginInternal.path}?username=$username&password=$password", permanent = false)
                 }
                 is Success -> call.respond(
                     message = AuthResponse(result.code, result::class.simpleName.toString(), "User registered successfully."),
@@ -44,14 +45,14 @@ fun Routing.authentication(companyId: String) {
         } catch (e: Exception) { onUnauthorizedError() }
     }
 
-    post("/$companyId/login") {
+    post(Route.Login.path) {
         val request = call.receive<AuthRequest>()
         try {
             val (username, password) = listOf(ppkGenerator.decrypt(request.username), ppkGenerator.decrypt(request.password))
             loginHandle(authRepository, username, password)
         } catch (e: Exception) { onUnauthorizedError() }
     }
-    get("/$companyId/loginInternal") {
+    get(Route.LoginInternal.path) {
         if (!isInternal) {
             onUnauthorizedError()
             return@get

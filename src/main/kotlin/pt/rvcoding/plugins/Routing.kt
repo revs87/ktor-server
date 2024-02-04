@@ -3,19 +3,17 @@ package pt.rvcoding.plugins
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
 import io.ktor.server.routing.*
-import pt.rvcoding.routes.authentication
-import pt.rvcoding.routes.configuration
-import pt.rvcoding.routes.tooling
-import pt.rvcoding.routes.users
+import pt.rvcoding.routes.*
 
 
-fun Application.configureRouting(companyId: String) {
+fun Application.configureRouting() {
     routing {
         root()
         tooling()
-        configuration(companyId)
-        authentication(companyId)
-        users(companyId)
+        configuration()
+        authentication()
+        users()
+        appointments()
     }
 }
 

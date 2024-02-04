@@ -2,6 +2,8 @@ package pt.rvcoding.domain
 
 class Configuration {
     companion object {
+        val COMPANY_ID: String by lazy { "rvc" }
+
         const val PKK_ENCRYPTION_IS_ACTIVE: Boolean = true
         const val TOKEN_IS_ACTIVE: Boolean = true
 

@@ -1,4 +1,4 @@
-package pt.rvcoding.domain.auth
+package pt.rvcoding.domain.repository
 
 interface AuthRepository {
     fun register(username: String?, password: String?): RegisterResult

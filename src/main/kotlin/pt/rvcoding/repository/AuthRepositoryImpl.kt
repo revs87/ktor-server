@@ -1,21 +1,25 @@
 package pt.rvcoding.repository
 
-import pt.rvcoding.domain.auth.AuthRepository
-import pt.rvcoding.domain.auth.ChangePasswordResult
-import pt.rvcoding.domain.auth.LoginResult
-import pt.rvcoding.domain.auth.RegisterResult
-import java.util.Collections.synchronizedList
+import org.koin.java.KoinJavaComponent.inject
+import pt.rvcoding.domain.models.User
+import pt.rvcoding.domain.repository.*
+import java.util.*
 
 class AuthRepositoryImpl : AuthRepository {
-    private val users: MutableList<String> = synchronizedList(mutableListOf())
+    private val userRepository: UserRepository by inject(UserRepository::class.java)
 
     override fun register(username: String?, password: String?): RegisterResult {
         return try {
             when {
                 !validCredentials(username, password) -> RegisterResult.InvalidParametersError
-                users.contains(username) -> RegisterResult.UserAlreadyRegisteredError
+                userRepository.containsEmail(username) -> RegisterResult.UserAlreadyRegisteredError
                 else -> {
-                    username?.let { users.add(it) }
+                    val user = User(
+                        email = username ?: "",
+                        password = password ?: "",
+                        lastLogin = Date().time,
+                    )
+                    userRepository.update(user)
                     RegisterResult.Success
                 }
             }
@@ -26,8 +30,16 @@ class AuthRepositoryImpl : AuthRepository {
         return try {
             when {
                 !validCredentials(username, password) -> LoginResult.InvalidParametersError
-                !users.contains(username) -> LoginResult.CredentialsMismatchError
-                else -> LoginResult.Success
+                !userRepository.containsEmail(username) -> LoginResult.CredentialsMismatchError
+                else -> {
+                    val user = userRepository.get(username ?: "")
+                    user?.let {
+                        userRepository.update(
+                            user.copy(lastLogin = Date().time)
+                        )
+                    }
+                    LoginResult.Success
+                }
             }
         } catch (e: Exception) { LoginResult.UnauthorizedError }
     }

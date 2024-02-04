@@ -1,4 +1,4 @@
-package pt.rvcoding.domain.auth
+package pt.rvcoding.domain.response
 
 import kotlinx.serialization.Serializable
 

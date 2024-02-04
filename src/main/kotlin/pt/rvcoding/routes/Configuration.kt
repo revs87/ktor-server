@@ -8,17 +8,20 @@ import kotlinx.serialization.Serializable
 import org.koin.ktor.ext.inject
 import pt.rvcoding.domain.Configuration.Companion.EXPIRATION_TIME
 import pt.rvcoding.domain.Configuration.Companion.TIMEOUT
+import pt.rvcoding.domain.Route
 import pt.rvcoding.repository.PPKGenerator
 import pt.rvcoding.routes.ConfigurationKeys.Companion.CURRENCY_KEY
 import pt.rvcoding.routes.ConfigurationKeys.Companion.EXPIRATION_TIME_KEY
 import pt.rvcoding.routes.ConfigurationKeys.Companion.FEATURE_FLAGS_KEY
+import pt.rvcoding.routes.ConfigurationKeys.Companion.PUBLIC_ALGORITHM_KEY
+import pt.rvcoding.routes.ConfigurationKeys.Companion.PUBLIC_FORMAT_KEY
 import pt.rvcoding.routes.ConfigurationKeys.Companion.PUBLIC_KEY_KEY
 import pt.rvcoding.routes.ConfigurationKeys.Companion.TIMEOUT_KEY
 
-fun Routing.configuration(companyId: String) {
+fun Routing.configuration() {
     val ppkGenerator: PPKGenerator by inject()
 
-    get("/$companyId/configuration") {
+    get(Route.Configuration.path) {
         call.respond(
             message = ConfigurationResponse(
                 configuration = mapOf(
@@ -27,6 +30,8 @@ fun Routing.configuration(companyId: String) {
                     CURRENCY_KEY to "EUR",
                     EXPIRATION_TIME_KEY to EXPIRATION_TIME.toString(),
                     TIMEOUT_KEY to TIMEOUT.toString(),
+                    PUBLIC_ALGORITHM_KEY to ppkGenerator.publicKey.algorithm,
+                    PUBLIC_FORMAT_KEY to ppkGenerator.publicKey.format,
                 )
             ),
             status = HttpStatusCode.OK
@@ -41,8 +46,9 @@ data class ConfigurationResponse(
 
 class ConfigurationKeys {
     companion object {
-        const val PUBLIC_KEY_KEY = "publicKey"
-        const val TOKEN_KEY = "Authentication"
+        const val PUBLIC_KEY_KEY = "public"
+        const val PUBLIC_ALGORITHM_KEY = "publicAlgorithm"
+        const val PUBLIC_FORMAT_KEY = "publicFormat"
         const val FEATURE_FLAGS_KEY = "featureFlags"
         const val CURRENCY_KEY = "currency"
         const val EXPIRATION_TIME_KEY = "expirationInMillis"
