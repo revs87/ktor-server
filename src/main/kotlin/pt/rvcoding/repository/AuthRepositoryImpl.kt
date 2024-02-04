@@ -7,6 +7,7 @@ import java.util.*
 
 class AuthRepositoryImpl : AuthRepository {
     private val userRepository: UserRepository by inject(UserRepository::class.java)
+    private val ppkGenerator: PPKGenerator by inject(PPKGenerator::class.java)
 
     override fun register(username: String?, password: String?): RegisterResult {
         return try {
@@ -16,7 +17,7 @@ class AuthRepositoryImpl : AuthRepository {
                 else -> {
                     val user = User(
                         email = username ?: "",
-                        password = password ?: "",
+                        password = ppkGenerator.encrypt(password ?: ""),
                         lastLogin = Date().time,
                     )
                     userRepository.update(user)
@@ -30,7 +31,7 @@ class AuthRepositoryImpl : AuthRepository {
         return try {
             when {
                 !validCredentials(username, password) -> LoginResult.InvalidParametersError
-                !userRepository.containsEmail(username) -> LoginResult.CredentialsMismatchError
+                !userRepository.validCredentials(username ?: "", password ?: "") -> LoginResult.CredentialsMismatchError
                 else -> {
                     val user = userRepository.get(username ?: "")
                     user?.let {
