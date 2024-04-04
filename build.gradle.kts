@@ -6,10 +6,11 @@ val koinVersion: String by project
 plugins {
     application
     kotlin("jvm") version "1.9.21"
+    kotlin("plugin.serialization") version "1.9.21"
 }
 
 group = "pt.rvcoding"
-version = "0.1-SNAPSHOT"
+version = "0.1"
 
 application {
     mainClass.set("io.ktor.server.netty.EngineMain")
@@ -30,6 +31,7 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-server-default-headers:$ktorVersion")
+    implementation("io.ktor:ktor-server-html-builder:$ktorVersion")
 
 //    testImplementation("io.ktor:ktor-server-tests:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
