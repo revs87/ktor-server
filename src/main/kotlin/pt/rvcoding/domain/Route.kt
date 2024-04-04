@@ -3,6 +3,7 @@ package pt.rvcoding.domain
 import pt.rvcoding.domain.Configuration.Companion.COMPANY_ID as id
 
 sealed class Route(val path: String) {
+    data object Hello: Route("/")
     data object Configuration: Route("/$id/configuration")
     data object Register: Route("/$id/register")
     data object Login: Route("/$id/login")
