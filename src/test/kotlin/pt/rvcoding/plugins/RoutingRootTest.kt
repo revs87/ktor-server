@@ -12,7 +12,7 @@ class RoutingRootTest {
 
     @Test
     fun `testRoot GIVEN root endpoint THEN returns Hello message`() = testApplication {
-        val response = client.get(Route.Hello.path)
+        val response = client.get(Route.Root.path)
         assertEquals(HttpStatusCode.OK, response.status)
         assertEquals("Hello, Kotlin Multiplatform guinea pig!", response.bodyAsText())
     }

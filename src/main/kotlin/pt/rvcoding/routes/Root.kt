@@ -12,7 +12,7 @@ fun Routing.root() {
     staticResources("/rvcbanner", "static") { default("rvcbanner.jpg") }
     staticResources("/styles", "styles") { default("styles.css") }
 
-    get(Route.Hello.path) {
+    get(Route.Root.path) {
         call.respond(
             message = "Hello, Kotlin Multiplatform guinea pig!",
             status = HttpStatusCode.OK
