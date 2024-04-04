@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "pt.rvcoding"
-version = "0.1-SNAPSHOT"
+version = "0.1"
 
 application {
     mainClass.set("io.ktor.server.netty.EngineMain")
